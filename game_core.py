@@ -117,7 +117,16 @@ def derive_security_specs(
     """
     specs = {}
     for ticker, prices in price_history.items():
-        prices = [p for p in prices if p is not None and p > 0]
+        # Safely coerce each value to float — skips None, strings (sub-header rows), and zeros
+        clean = []
+        for p in prices:
+            try:
+                v = float(p)
+                if v > 0:
+                    clean.append(v)
+            except (TypeError, ValueError):
+                pass
+        prices = clean
         if not prices:
             specs[ticker] = SecuritySpec(ticker=ticker)
             continue
