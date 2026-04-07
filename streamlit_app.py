@@ -936,14 +936,23 @@ if role=="Host":
             c4.metric("Repo Outstanding",  _fmt(s["repo_outstanding"]))
             c5.metric("PnL Realized",      _fmt(s["pnl_realized"]))
             c6.metric("Net Score",         _fmt(s["net_score"]))
-            st.markdown("")
-            status_col=":green" if gap<=0 else ":red"
-            st.markdown(
-                f"Withdrawal **{_fmt(w)}** &nbsp;·&nbsp; "
-                f"Cash available {status_col}[**{_fmt(ca)}**] &nbsp;·&nbsp; "
-                f"{'✅ Covered' if gap<=0 else f'⚠ Short by **{_fmt(gap)}**'} &nbsp;·&nbsp; "
-                f"Penalties :red[{_fmt(s['penalty_total'])}]"
-            )
+            # Status bar — pure HTML avoids mixing Streamlit :color[] syntax with &nbsp; entities
+            ca_color = "#34D399" if gap<=0 else "#F87171"
+            status_txt = "✅ Covered" if gap<=0 else f"⚠ Short by {_fmt(gap)}"
+            status_color = "#34D399" if gap<=0 else "#F87171"
+            pen_color = "#F87171" if s["penalty_total"]>0 else "#475569"
+            st.markdown(f"""
+<div style='font-family:DM Mono,monospace;font-size:0.8rem;background:#0D1625;
+border:1px solid #1E2D45;border-radius:8px;padding:0.7rem 1rem;
+display:flex;gap:2rem;flex-wrap:wrap;align-items:center;margin-top:0.5rem;'>
+    <span><span style='color:#475569;'>Withdrawal </span>
+          <strong style='color:#F1F5F9;'>{_fmt(w)}</strong></span>
+    <span><span style='color:#475569;'>Cash </span>
+          <strong style='color:{ca_color};'>{_fmt(ca)}</strong></span>
+    <strong style='color:{status_color};'>{status_txt}</strong>
+    <span><span style='color:#475569;'>Penalties </span>
+          <strong style='color:{pen_color};'>{_fmt(s["penalty_total"])}</strong></span>
+</div>""", unsafe_allow_html=True)
 
 else:
     # ── PLAYER TABS ───────────────────────────────────────────────────────────
